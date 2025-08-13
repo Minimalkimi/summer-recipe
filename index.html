@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title> ☀️Sunshine in a Jar ✨</title>
+    <style>
+      :root {
+        --pink: #ffc6d9;
+        --orange: #ffd8a9;
+        --yellow: #fff5ba;
+        --text: #4b3b40;
+        --jar-bg: rgba(255, 255, 255, 0.65);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", Roboto, system-ui, -apple-system,
+          "Helvetica Neue", Arial;
+        margin: 0;
+        padding: 0;
+        background-image: url("https://s3.amazonaws.com/shecodesio-production/uploads/files/000/172/095/original/bg5.jpg?1755043399");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-color: black;
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 32px;
+      }
+      body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(230, 220, 255, 0.6);
+  z-index: -1;
+  pointer-events: none;
+}
+      .page {
+        width: 100%;
+        max-width: 1000px;
+        background: url("https://www.transparenttextures.com/patterns/paper-fibers.png");
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 12px 30px rgba(75, 59, 64, 0.12);
+        position: relative;
+      }
+      header {
+        background: var(--pink);
+        padding: 20px;
+        border-radius: 12px;
+        text-align: center;
+        margin-bottom: 16px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 30px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 420px;
+        gap: 16px;
+      }
+      .card {
+        background: var(--orange);
+        padding: 16px;
+        border-radius: 14px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+      }
+      .section-title {
+        font-weight: 700;
+        margin: 0 0 8px 4px;
+      }
+      .story {
+        font-size: 15px;
+        line-height: 1.45;
+      }
+      .ingredients ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      .ingredients li::before {
+        content: "✨ ";
+      }
+
+      /* Drag & Drop area */
+      .play-area {
+        display: flex;
+        gap: 16px;
+        flex-direction: column;
+        align-items: center;
+      }
+      .ingredients-palette {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding: 8px;
+        border-radius: 10px;
+      }
+      .chip {
+        background: var(--pink);
+        padding: 10px 13px;
+        border-radius: 12px;
+        font-size: 21px;
+        cursor: grab;
+        user-select: none;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+      }
+      .chip.dragging {
+        opacity: 0.5;
+      }
+
+      .jar-wrap {
+        width: 220px;
+        height: 320px;
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.9),
+          rgba(255, 255, 255, 0.6)
+        );
+        border-radius: 18px;
+        border: 6px solid rgba(255, 255, 255, 0.6);
+        position: relative;
+        box-shadow: inset 0 6px 12px rgba(0, 0, 0, 0.04),
+          0 10px 30px rgba(0, 0, 0, 0.08);
+      }
+      .jar-glass {
+        position: absolute;
+        left: 8px;
+        right: 8px;
+        bottom: 14px;
+        top: 14px;
+        border-radius: 12px;
+        background: var(--jar-bg);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column-reverse;
+        align-items: center;
+        justify-content: flex-start;
+      }
+      .layer {
+        width: 100%;
+        transition: height 0.5s ease, opacity 0.4s;
+      }
+      .layer.mango {
+        background: linear-gradient(90deg, #ffe0b2, #ffd8a9);
+        height: 0%;
+      }
+      .layer.chia {
+        background: linear-gradient(90deg, #fff8e1, #fff5ba);
+        height: 0%;
+      }
+      .layer.coconut {
+        background: linear-gradient(90deg, #fffdf2, #fff5f0);
+        height: 0%;
+      }
+      .layer.honey {
+        background: linear-gradient(90deg, #ffe7a7, #ffd7a6);
+        height: 0%;
+      }
+      .layer.mint {
+        background: linear-gradient(90deg, #e6fff1, #dff7e9);
+        height: 0%;
+      }
+      .jar-label {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-weight: 700;
+        background: rgba(255, 255, 255, 0.6);
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+
+      .status {
+        margin-top: 10px;
+        font-weight: 700;
+        min-height: 19px;
+        text-align: center;
+      }
+      .complete {
+        color: #0a7a3b;
+      }
+
+      /* Spotify and controls */
+      .right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: relative;
+      }
+      iframe {
+        border-radius: 12px;
+      }
+
+      /* Sparkles on complete */
+      .sparkle-complete {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: white;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.9);
+        animation: pop 1s ease forwards;
+      }
+      @keyframes pop {
+        0% {
+          transform: scale(0.2);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      /* Responsive */
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .right-column {
+          order: 2;
+        }
+        .play-area {
+          order: 1;
+        }
+        .mini {
+          width: 72px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    
+    <div class="page" role="main">
+      <header>
+        <h1>Sunshine in a Jar ✨</h1>
+        <p style="margin: 6px 0 0 0; font-size: 15px">
+          Mango Chia Pudding
+        </p>
+      </header>
+
+      <div class="grid" style="margin-top: 16px">
+        <div class="card">
+          <h3 class="section-title">Story</h3>
+          <p class="story">
+            This cozy treat is my summer go-to. It’s perfect for slow mornings,
+            sketching, and sharing with friends under the porch fan.
+          </p>
+
+          <h3 class="section-title" style="margin-top: 14px">
+            Build Your Jar
+          </h3>
+          <h5>Drag the ingredients into the jar and build your own!</h5>
+          <div class="play-area">
+            <div
+              class="ingredients-palette"
+              id="palette"
+              aria-label="Ingredients palette"
+            >
+              <div
+                draggable="true"
+                tabindex="0"
+                class="chip"
+                data-ingredient="mango"
+                aria-grabbed="false"
+              >
+                🥭 Mango
+              </div>
+              <div
+                draggable="true"
+                tabindex="0"
+                class="chip"
+                data-ingredient="chia"
+                aria-grabbed="false"
+              >
+                🌱 Chia
+              </div>
+              <div
+                draggable="true"
+                tabindex="0"
+                class="chip"
+                data-ingredient="coconut"
+                aria-grabbed="false"
+              >
+                🥥 Coconut
+              </div>
+              <div
+                draggable="true"
+                tabindex="0"
+                class="chip"
+                data-ingredient="honey"
+                aria-grabbed="false"
+              >
+                🍯 Honey
+              </div>
+              <div
+                draggable="true"
+                tabindex="0"
+                class="chip"
+                data-ingredient="mint"
+                aria-grabbed="false"
+              >
+                🌿 Mint
+              </div>
+            </div>
+
+            <div class="jar-wrap" aria-label="Jar area - drop ingredients here">
+              <div class="jar-label">Drop ingredients here</div>
+              <div class="jar-glass" id="jar">
+                <div
+                  class="layer mint"
+                  id="layer-mint"
+                  data-name="mint"
+                  style="height: 0%"
+                ></div>
+                <div
+                  class="layer honey"
+                  id="layer-honey"
+                  data-name="honey"
+                  style="height: 0%"
+                ></div>
+                <div
+                  class="layer coconut"
+                  id="layer-coconut"
+                  data-name="coconut"
+                  style="height: 0%"
+                ></div>
+                <div
+                  class="layer chia"
+                  id="layer-chia"
+                  data-name="chia"
+                  style="height: 0%"
+                ></div>
+                <div
+                  class="layer mango"
+                  id="layer-mango"
+                  data-name="mango"
+                  style="height: 0%"
+                ></div>
+              </div>
+            </div>
+
+            <div class="status" id="status" aria-live="polite">
+              Add at least 3 ingredients to make a tasty jar.
+            </div>
+            <div
+              style="
+                display: flex;
+                gap: 10px;
+                margin-top: 10px;
+                justify-content: center;
+              "
+            >
+              <button id="resetBtn" onclick="resetJar()">Reset Jar</button>
+              <a
+                id="downloadPdf"
+                href="sunshine_recipe_card.pdf"
+                download
+                style="display: inline-block; text-decoration: none"
+                ><button>📥 Download Recipe Card</button></a
+              >
+            </div>
+          </div>
+        </div>
+
+        <aside class="right-column">
+          <div class="card">
+            <h3 class="section-title">Ingredients</h3>
+            <div class="ingredients">
+              <ul>
+                <li>1 cup coconut or almond milk</li>
+                <li>1/4 cup chia seeds</li>
+                <li>1 tbsp honey or maple syrup</li>
+                <li>1 cup fresh mango</li>
+                <li>Toasted coconut flakes (optional)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 class="section-title">Summer Vibes Playlist</h3>
+            <iframe
+              data-testid="embed-iframe"
+              style="border-radius: 12px"
+              src="https://open.spotify.com/embed/playlist/37i9dQZF1DX1gRalH1mWrP?utm_source=generator"
+              width="100%"
+              height="352"
+              frameborder="0"
+              allowfullscreen=""
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+            ></iframe>
+          </div>
+
+          <div class="card">
+            <h3 class="section-title">Tips</h3>
+            <p style="margin: 0">
+              Try dragging mango first to create a sunny base. The jar fills visually as you add layers.
+            </p>
+          </div>
+        </aside>
+      </div>
+
+
+    <script>
+      // Drag and Drop logic
+      const chips = document.querySelectorAll(".chip");
+      const jar = document.getElementById("jar");
+      const status = document.getElementById("status");
+      const layerOrder = ["mango", "chia", "coconut", "honey", "mint"]; // order in jar (bottom to top visually)
+      const layers = {};
+      let placed = new Set();
+
+      // Map id -> element
+      layerOrder.forEach((name) => {
+        layers[name] = document.getElementById("layer-" + name);
+      });
+
+      chips.forEach((chip) => {
+        chip.addEventListener("dragstart", (e) => {
+          e.dataTransfer.setData("text/plain", chip.dataset.ingredient);
+          chip.classList.add("dragging");
+        });
+        chip.addEventListener("dragend", () =>
+          chip.classList.remove("dragging")
+        );
+        // keyboard support for "dropping" via Enter
+        chip.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            addIngredient(chip.dataset.ingredient);
+          }
+        });
+      });
+
+      jar.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+
+      jar.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const ing = e.dataTransfer.getData("text/plain");
+        if (ing) addIngredient(ing);
+      });
+
+      function addIngredient(ing) {
+        if (placed.has(ing)) {
+          status.textContent = ing + " already added!";
+          return;
+        }
+        placed.add(ing);
+        // determine layer height increment (simple equal shares)
+        const totalPossible = layerOrder.length;
+        const increment = 100 / totalPossible;
+        layers[ing].style.height = increment + "%";
+        layers[ing].style.opacity = 1;
+        updateStatus();
+        checkComplete();
+      }
+
+      function updateStatus() {
+        const count = placed.size;
+        if (count === 0)
+          status.textContent =
+            "Drag at least 3 ingredients to make a cozy jar.";
+        else
+          status.textContent =
+            "You've added " +
+            count +
+            " ingredient" +
+            (count > 1 ? "s" : "") +
+            ".";
+      }
+
+      function resetJar() {
+        placed.clear();
+        layerOrder.forEach((name) => {
+          layers[name].style.height = "0%";
+          layers[name].style.opacity = 0.0;
+        });
+        status.textContent =
+          "Jar reset. Drag at least 3 ingredients to make a cozy jar.";
+      }
+
+      function checkComplete() {
+        if (placed.size >= 3) {
+          status.innerHTML =
+            '<span class="complete">✨ Your Sunshine Jar is ready! ✨</span>';
+          // show sparkles
+          showCompleteSparkles();
+        }
+      }
+
+      function showCompleteSparkles() {
+        // create 8 sparkles around jar
+        const jarWrap = document.querySelector(".jar-wrap");
+        for (let i = 0; i < 8; i++) {
+          const s = document.createElement("div");
+          s.className = "sparkle-complete";
+          s.style.left = 20 + Math.random() * 60 + "%";
+          s.style.top = 10 + Math.random() * 60 + "%";
+          jarWrap.appendChild(s);
+          setTimeout(() => s.remove(), 1200);
+        }
+      }
+
+      // Mini toggle
+      function toggleMini() {
+        const t = document.getElementById("miniTip");
+        t.style.display = t.style.display === "block" ? "none" : "block";
+      }
+
+      // Audio toggle
+      function toggleAudio() {
+        const a = document.getElementById("bgAudio");
+        if (a.paused) a.play();
+        else a.pause();
+      }
+
+      // Accessibility: allow drop with keyboard focus on jar
+      jar.setAttribute("tabindex", "0");
+      jar.addEventListener("keydown", (e) => {
+        if (
+          e.key === "Enter" &&
+          document.activeElement.classList.contains("chip")
+        ) {
+          const ing = document.activeElement.dataset.ingredient;
+          addIngredient(ing);
+        }
+      });
+
+      // small UX: allow clicking chips to add
+      chips.forEach((chip) => {
+        chip.addEventListener("click", () =>
+          addIngredient(chip.dataset.ingredient)
+        );
+      });
+    </script>
+  </body>
+</html>
